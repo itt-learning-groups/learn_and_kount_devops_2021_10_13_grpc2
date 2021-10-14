@@ -187,7 +187,7 @@
       * example from etcd: [Why gRPC gateway](https://etcd.io/docs/v3.4/dev-guide/api_grpc_gateway/): "For languages with no gRPC support, etcd provides a JSON gRPC gateway. This gateway serves a RESTful proxy that translates HTTP/JSON requests into gRPC messages."
     * [Adding gRPC-Gateway annotations to an existing proto file](https://grpc-ecosystem.github.io/grpc-gateway/docs/tutorials/adding_annotations/)
 
-    * **Exercise 6**: Add gRPC-Gateway to the proto file for your gRPC server from Exercise 3. Recompile using `buf`. Then add implement your server as a REST server using gRPC-Gateway running on localhost:8080. Test a REST request using `curl`, a browser, or Postman.
+    * **Exercise 6**: Add gRPC-Gateway annotations to the proto file for your gRPC server from Exercise 3. Recompile using `buf` after updating the "deps" in the `buf.yaml` and the plugins list in the `buf.gen.yaml` to ensure grpc-gateway server-proxy code will get generated along with your earlier compiled protobuf. Then add on to your server initialization in `main.go` to re-implement it as a REST server using gRPC-Gateway running on localhost:8080. Test a REST request using `curl`, a browser, or Postman.
 
 * Resources, links
   * [Awesome gRPC](https://github.com/grpc-ecosystem/awesome-grpc): *"A curated list of useful resources for gRPC"*
