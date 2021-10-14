@@ -142,7 +142,7 @@
           * <https://pkg.go.dev/google.golang.org/grpc#CallOption>
           * "For what it's worth, a CallOption from a user's perspective looks like not much... and that's why the before/after methods are private in the first place. Right now, we have the freedom to completely change how CallOptions are implemented internally with very few restrictions without breaking users... [A]dding an API may be easy, but it is very hard for us to change or remove bad APIs." *--Mehrdad Afshari, grpc core contributer*
 
-    * **Exercise 2**: Modify the gRPC server to implement a Server Unary Interceptor that attempts to log the request and response headers any time *any* server endpoint gets hit. (Note: Part of this will may turn out to be unexpectedly tricky.)
+    * **Exercise 2**: Modify the gRPC server to implement a Server Unary Interceptor that attempts to log the request and response headers any time *any* server endpoint gets hit. *(Note: Part of this may turn out to be unexpectedly tricky -- specifically the attempt to log response headers. This sounds as if it should be possible but you'll find that it's not... and least within a server interceptor. It's an interesting snag to run into, which is why I left it in. We can try it again on the client side in Exercise 4.)*
       * Suggestion: As a first step, forget about the request/response header logging. First, just try to create a valid interceptor that does something dead simple like log "Hello world". Register it on your server and test it by running your server and using one of the CLI/GUI tools we tried out above to send it a request. If your interceptor works, you should see "Hello world" get logged in your server's log output.
       * You might find these blog articles helpful guides:
         * <https://shijuvar.medium.com/writing-grpc-interceptors-in-go-bf3e7671fe48>
@@ -152,11 +152,16 @@
       * Question: The `response` is typed as an `interface{}`. Is there any way to access its internal structure (properties, methods) as we look for a way to get header info from it?
       * Question: Why use an interceptor? Couldn't we just do this stuff in the endpoint handler(s)? What can an interceptor do that an ordinary RPC handler function can't do?
 
-    * **Exercise 3**: Suppose we want to add a 2nd server interceptor. Try it and see what happens: Add a 2nd interceptor that adds a new custom header to the request. (Be careful you don't accidentally over-write the existing headers, BTW.) Add it as another CallOption on the NewServer call. If something unexpected happens, see if you can find an alternative approach.
+    * **Exercise 3**: Suppose we want to add a 2nd server interceptor. Try it and see what happens: Add a 2nd interceptor that adds a new custom header to the request. (Be careful you don't accidentally over-write the existing headers, BTW.) Add it as another ServerOption argument on the NewServer call. If something unexpected happens, see if you can find an alternative approach.
+      * Spoiler: You'll get an error when you try to run the server.
+      * Hints:
+        * You could surrender and combine all the logic into a single interceptor; that would work though it would be more ugly.
+        * That's why there are "chain" interceptor methods in grpc core and grpc-middleware libraries: You can wrap multiple interceptors inside one of these. For example: <https://pkg.go.dev/google.golang.org/grpc#ChainUnaryInterceptor>.
 
     * **Exercise 4**: Create a simple gRPC client that dials `localhost:50051` and sends a request to our server's endpoint. Then implement a client interceptor and try to use it to log response headers and/or trailers from the client side.
       * Suggestion: As a first step, forget about the response header logging. First, just try to create a valid interceptor that does something dead simple like in the 1st step for Exercise 2.
-      * Note: This is a potentially tricky one. You could forget about the response headers/trailers and just do something different with this interceptor. Hint: Take a look at the CallOptions at your disposal.
+      * Note that you'll need to import your compiled protobuf for the client like you did for the server.
+      * Note: This is a potentially tricky one. That's because you'll discover you need to turn to using (a) CallOption(s) to get access to the response headers/trailers. You're unlikely to find a simple tutorial on how to use a CallOption, so you'll probably have to figure it out on your own. But if you don't want to go that route, you can just forget about response headers/trailers and do something else with this interceptor.
 
   * Middleware
 
@@ -189,7 +194,7 @@
   * [A Guide to gRPC and Interceptors](https://edgehog.blog/a-guide-to-grpc-and-interceptors-265c306d3773) (blog article also referenced above in Exercise 2)
   * [gRPC Go: Beyond the basics](https://blog.gopheracademy.com/advent-2017/go-grpc-beyond-basics/), from Gopher Academy Blog: *"The purpose of this blog is to be a guideline for where to find the resources and leverage these libraries and features to make the most of the gRPC ecosystem after you understand the basics of gRPC"*
 
-* Kount implementation and standards/patterns // Maybe meeting #2; more likely meeting #3
+* Kount implementation and standards/patterns //Todo: approx. meeting #3
   * "Template" projects in GitLab `plat` group
   * The common server implementation patterns
     * gRPC only
